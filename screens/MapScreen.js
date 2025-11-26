@@ -1,20 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, StyleSheet, TouchableOpacity, View, Text } from "react-native";
+import { ActivityIndicator, Alert, StyleSheet, View, Text } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import * as Location from 'expo-location';
+import * as Location from "expo-location";
 
 export default function MapScreen() {
     const [location, setLocation] = useState(null);
     const [markers, setMarkers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const mapRef = useRef(null);
 
     // Haetaan käyttäjän nykyinen sijainti
     useEffect(() => {
         (async () => {
             let { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-                Alert.alert('Paikannus edtetty', 'Sovellus tarvitsee paikannusoikeudet toimiakseen.');
+            if (status !== "granted") {
+                Alert.alert("Paikannus estetty", "Sovellus tarvitsee paikannusoikeudet toimiakseen.");
                 setLoading(false);
                 return;
             }
@@ -28,7 +27,7 @@ export default function MapScreen() {
                     longitudeDelta: 0.01,
                 });
             } catch (error) {
-                Alert.alert('Virhe, "Sijainnin hakeminen epäonnnistui.');
+                Alert.alert("Virhe", "Sijainnin hakeminen epäonnistui.");
             } finally {
                 setLoading(false);
             }
@@ -44,21 +43,6 @@ export default function MapScreen() {
         setMarkers([...markers, newMarker]);
     };
 
-    const goToCurrentLocation = async () => {
-        try {
-            let currentLocation = await Location.getCurrentPositionAsync({});
-            const newRegion = {
-                latitude: currentLocation.coords.latitude,
-                longitude: currentLocation.coords.longitude,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-            };
-            mapRef.current.animateToRegion(newRegion, 1000);
-        } catch (error) {
-            Alert.alert('Virhe', 'Sijainnin hakeminen epäonnistui.');
-        }
-    };
-
     //Näytetään latausilmoitus, kun sijaintia haetaan
     if (loading) {
         return (
@@ -69,33 +53,25 @@ export default function MapScreen() {
         );
     }
 
-    // Renderöidään kartta ja markerit
     return (
         <View style={styles.container}>
             {location && (
-                <View>
-                    <MapView
-                        ref={mapRef}
-                        style={styles.map}
-                        initialRegion={location}
-                        showsUserLocation={true}
-                        onLongPress={handleLongPress}
-                    >
-                        {markers.map((marker) => (
-                            <Marker
-                                key={marker.key}
-                                coordinate={marker.coordinate}
-                                title="Sienipaikka"
-                                description="Pitkällä painalluksella lisätty paikka"
-                                pinColor="#DAA520"
-                            />
-                        ))}
-                    </MapView>
-
-                    <TouchableOpacity style={styles.locationButton} onPress={goToCurrentLocation}>
-                        <Text style={styles.locationButtonText}>Palaa nykyiseen sijaintiin</Text>
-                    </TouchableOpacity>
-                </View>
+                <MapView
+                    style={styles.map}
+                    initialRegion={location}
+                    showsUserLocation={true}
+                    onLongPress={handleLongPress}
+                >
+                    {markers.map((marker) => (
+                        <Marker
+                            key={marker.key}
+                            coordinate={marker.coordinate}
+                            title="Sienipaikka"
+                            description="Lisätty pitkällä painalluksella"
+                            pinColor="#DAA520"
+                        />
+                    ))}
+                </MapView>
             )}
         </View>
     );
@@ -110,29 +86,13 @@ const styles = StyleSheet.create({
     },
     loadingContainer: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#fff',
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#fff",
     },
     loadingText: {
         marginTop: 10,
         fontSize: 16,
         color: "#555",
-    },
-    locationButton: {
-        position: "absolute",
-        bottom: 30,
-        right: 20,
-        backgroundColor: "#fff",
-        padding: 10,
-        borderRadius: 5,
-        elevation: 5,
-        shadowColor: "#000",
-        shadowOpacity: 0.3,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 4,
-    },
-    locationButtonText: {
-        fontSize: 24,
     },
 });
