@@ -14,6 +14,7 @@ export default function App() {
           component={MapScreen}
           options={{ title: 'MyShroom' }}
         />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
