@@ -39,7 +39,7 @@ export default function MapScreen() {
         })();
     }, []);
 
-    // Haetaan tallennetut markerit tietovarastoon
+    // Lataa tallennetut markerit
     useEffect(() => {
         const loadMarkers = async () => {
             try {
@@ -80,6 +80,7 @@ export default function MapScreen() {
         saveMarkersToStorage(updatedList);
 
         // Avaa ponnahdusikkunan nimen syöttöä varten
+        setMushroomName("");
         setCurrentMarkerKey(newMarker.key);
         setShowModal(true);
     };
@@ -92,7 +93,7 @@ export default function MapScreen() {
         }
 
         // Käydään markerilista läpi ja korvataan muokattu markeri
-        const updatedList = markers.map(marker => 
+        const updatedList = markers.map(marker =>
             marker.key === currentMarkerKey ? { ...marker, name: mushroomName } : marker
         );
 
@@ -126,6 +127,14 @@ export default function MapScreen() {
         );
     }
 
+    const mushroomIcons = {
+        Kanttarelli: require("../assets/icons/kanttarelli.png"),
+        Suppilovahvero: require("../assets/icons/suppilovahvero.png"),
+        Herkkutatti: require("../assets/icons/herkkutatti.png"),
+        Kangashapero: require("../assets/icons/kangashapero.png"),
+        Kärpässieni: require("../assets/icons/karpassieni.png"),
+    }
+
     // Näytön sisältö
     return (
         <View style={styles.container}>
@@ -144,8 +153,11 @@ export default function MapScreen() {
                                 key={marker.key}
                                 coordinate={marker.coordinate}
                                 title={marker.name || "Sienipaikka"}
-                                pinColor="#0e08d1ff"
-                                onPress={() => {
+                                // pinColor="#0e08d1ff"
+
+                                image={marker.name ? mushroomIcons[marker.name] : undefined}
+
+                                onCalloutPress={() => {
                                     setCurrentMarkerKey(marker.key);
                                     setMushroomName(marker.name || "");
                                     setShowModal(true);
@@ -176,15 +188,16 @@ export default function MapScreen() {
                                 />
 
                                 {/* "tallennus"- ja "poisto" -napit */}
-                                <Button title="Tallenna" onPress={saveNameForMarker} />
-                                <Button title="Poista" onPress={deleteMarker} />
-                                <Button title="Sulje" onPress={() => setShowModal(false)} />
+                                <Button title="Tallenna" color="green" onPress={saveNameForMarker} />
+                                <Button title="Poista" color="red" onPress={deleteMarker} />
+                                <Button title="Sulje" color="gray" onPress={() => setShowModal(false)} />
                             </View>
                         </View>
                     </Modal>
                 </>
-            )}
-        </View>
+            )
+            }
+        </View >
     );
 }
 
@@ -211,11 +224,12 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     modalBox: {
-        width: "80%",
+        width: "100%",
         backgroundColor: "#fff",
         padding: 20,
         borderRadius: 10,
         elevation: 5,
+        alignItems: "center",
     },
     input: {
         borderWidth: 1,
@@ -224,5 +238,5 @@ const styles = StyleSheet.create({
         padding: 12,
         fontSize: 16,
         marginBottom: 20,
-    }
+    },
 });
